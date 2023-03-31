@@ -1,8 +1,15 @@
 import logging
 import os
 
+logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+logging.basicConfig(
+    level=logging.INFO
+    logging_format=logging_format,
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
 logger = logging.getLogger(__name__)
-logger.basicConfig(level=logging.INFO)
 
 
 class DatabaseConfiguration:
@@ -63,7 +70,6 @@ class Configuration:
         "LOG_LEVEL",
         "LOG_FILE",
     ]
-    __LOAD_FROM_ENVIRONMENT = True
 
     def __init__(self) -> None:
         """
@@ -81,3 +87,5 @@ class Configuration:
             if os.getenv(env_var):
                 self.database.set_property(env_var.lower().strip("database_"),
                                            os.getenv(env_var))
+
+        
