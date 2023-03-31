@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "licensor"
+
+authors = [
+    {name = "James Washington", email = "jwashington104.jw@gmail.com"},
+]
+description = "A tool for managing licenses in your SAAS product."
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+depedencies = [
+    "fastapi",
+]
+
+[options]
+packages = find:    # find all packages in the src directory
+python_requires = >=3.11    # requires python 3.11 or higher
+include_package_data = True    # include non-python files in the package
+
+[options.packages.find]
+where = src    # look for packages in the src directory
+
+[options.extras_require]
+dev = [
+    "black",
+    "flake8",
+    "isort",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-randomly",
+    "pytest-xdist",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme",
+    "sphinxcontrib-apidoc",
+    "sphinxcontrib-trio",
+    "tox",
+    "twine",
+    "wheel",
+]
