@@ -25,6 +25,19 @@ class TestDatabaseConfiguration:
         db_config.set_property("host", "localhost")
         assert db_config.host == "localhost"
 
+    def test_database_uri(self):
+        db_config = DatabaseConfiguration()
+        db_config.set_property("host", "localhost")
+        db_config.set_property("port", "3306")
+        db_config.set_property("name", "test")
+        db_config.set_property("user", "test")
+        db_config.set_property("password", "test")
+        db_config.set_property("type", "mysql")
+
+        assert db_config.uri == (
+            "mysql://test:test@localhost:3306/test"
+        )
+
 
 class TestConfiguration:
     def test_instantiation(self):

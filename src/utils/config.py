@@ -4,7 +4,7 @@ import os
 logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 logging.basicConfig(
-    level=logging.INFO
+    level=logging.INFO,
     logging_format=logging_format,
     datefmt="%Y-%m-%d %H:%M:%S"
 )
@@ -75,8 +75,7 @@ class Configuration:
         """
         Constructor for the Configuration class.
         """
-        if os.getenv("LOAD_FROM_ENVIRONMENT"):
-            self.load_from_env()
+        self.load_from_env()
 
     def load_from_env(self) -> None:
         """
@@ -87,5 +86,3 @@ class Configuration:
             if os.getenv(env_var):
                 self.database.set_property(env_var.lower().strip("database_"),
                                            os.getenv(env_var))
-
-        
