@@ -2,10 +2,16 @@ package models
 
 import "time"
 
+// Administration Database Models.
+//
 // Tenant is a struct that represents a tenant in the database.
-// This is also split into separate schemas in the database.
+// Think of the "tenant" table as part of a top level administration instance.
+// This will be in it's own database, and will maintain a list of tenants along
+// with their associated database table names.
+//
 // This is to allow for multiple tenants to be stored in the same database server,
-// but allow tenant data to be stored in seperate databases providing isolation.
+// but allow tenant data to be stored in seperate databases, providing data isolation.
+// However, this adds complexity as we need to change the database connection at runtime...
 type Tenant struct {
 	OrgID     int       `db:"org_id"`
 	OrgName   string    `db:"org_name"`
@@ -15,7 +21,25 @@ type Tenant struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+// This represents a user in the administration database.
+// Users in this table will only be able to manage tenants, not licenses.
+type ManagementUser struct {
+	UserID    int       `db:"user_id"`
+	OrgUUID   string    `db:"org_uuid"`
+	Username  string    `db:"username"`
+	ApiKey    string    `db:"api_key"`
+	Email     string    `db:"email"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Active    bool      `db:"active"`
+	Deleted   bool      `db:"deleted"`
+	DeletedAt time.Time `db:"deleted_at"`
+	IsAdmin   bool      `db:"is_admin"`
+}
+
 // Tenant database models.
+
+// This represents a license in the tenant database.
 type License struct {
 	LicenseID      string    `db:"license_id"`
 	OrgUUID        string    `db:"org_uuid"`
@@ -27,6 +51,8 @@ type License struct {
 	UpdatedAt      time.Time `db:"updated_at"`
 }
 
+// This represents a user in the tenant database.
+// Users in this table will only be able to manage licenses, not tenants.
 type User struct {
 	UserID    string    `db:"user_id"`
 	OrgUUID   string    `db:"org_uuid"`
@@ -41,6 +67,8 @@ type User struct {
 	DeletedAt time.Time `db:"deleted_at"`
 }
 
+// This represents a customer in the tenant database.
+// Customers are the end users of the licenses provided by the tenant.
 type Customer struct {
 	CustomerID string    `db:"customer_id"`
 	OrgUUID    string    `db:"org_uuid"`
