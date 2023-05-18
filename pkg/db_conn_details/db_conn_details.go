@@ -1,7 +1,8 @@
-package dbconnector
+package dbconndetails
 
 import (
 	"errors"
+	"fmt"
 	"os"
 )
 
@@ -50,4 +51,14 @@ func GetDBConfig(Host, Port, User, Password, Database string) *DBConfig {
 		Password: Password,
 		Database: Database,
 	}
+}
+
+func (config *DBConfig) GetConnectionURL() string {
+	// "postgres://username:password@localhost:5432/database_name"
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.User, config.Password, config.Host, config.Port, config.Database)
+}
+
+func (config *DBConfig) GetConnectionURLWithoutCredentials() string {
+	// "postgres://localhost:5432/database_name"
+	return fmt.Sprintf("postgres://%s:%s/%s", config.Host, config.Port, config.Database)
 }
