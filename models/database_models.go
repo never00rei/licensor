@@ -39,9 +39,18 @@ type ManagementUser struct {
 
 // Tenant database models.
 
+// This represents a key value which will be used to validate and sign JWTs.
+type Key struct {
+	KeyID   int    `db:"key_id"`
+	OrgUUID string `db:"org_uuid"`
+	Key     []byte `db:"key"`
+}
+
 // This represents a license in the tenant database.
 type License struct {
 	LicenseID      string    `db:"license_id"`
+	Issuer         string    `db:"issuer"`
+	Verifier       string    `db:"verifier"`
 	OrgUUID        string    `db:"org_uuid"`
 	ValidFrom      time.Time `db:"valid_from"`
 	ValidUntil     time.Time `db:"valid_until"`
@@ -62,7 +71,7 @@ type User struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 	Active    bool      `db:"active"`
-	lastLogin time.Time `db:"last_login"`
+	LastLogin time.Time `db:"last_login"`
 	Deleted   bool      `db:"deleted"`
 	DeletedAt time.Time `db:"deleted_at"`
 }
