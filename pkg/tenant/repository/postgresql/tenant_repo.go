@@ -8,19 +8,19 @@ import (
 )
 
 type postgresqlTenantRepo struct {
-	Conn *pgxpool.Conn
+	pool *pgxpool.Pool
 }
 
 // NewPostgresqlTenantRepo will create an object that represent the tenant.Repository interface
-func NewPostgresqlTenantRepo(Conn *pgxpool.Conn) domain.TenantRepository {
-	return &postgresqlTenantRepo{Conn}
+func NewPostgresqlTenantRepo(pool *pgxpool.Pool) domain.TenantRepository {
+	return &postgresqlTenantRepo{pool}
 }
 
 // GetAll will return all of the tenants in the tenant database.
 func (p *postgresqlTenantRepo) GetAll(ctx context.Context) ([]*domain.Tenant, error) {
 	var tenants []*domain.Tenant
 
-	rows, err := p.Conn.Query(ctx, "SELECT org_id, org_name, org_uuid, table_name, created_at, updated_at FROM tenant")
+	rows, err := p.pool.Query(ctx, "SELECT org_id, org_name, org_uuid, table_name, created_at, updated_at FROM tenant")
 	if err != nil {
 		return nil, err
 	}
