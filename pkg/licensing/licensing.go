@@ -5,16 +5,16 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"github.com/never00rei/licensor/models"
+	"github.com/never00rei/licensor/domain"
 )
 
 // Createlicense creates a new license with the given parameters. It will calculate the valid until date based on the valid from date and the validity period which
 // should be given in days.
-func CreateLicense(issuer, verifier, orgUUID string, validFrom time.Time, validitiyPeriod int) *models.License {
+func CreateLicense(issuer, verifier, orgUUID string, validFrom time.Time, validitiyPeriod int) *domain.License {
 	licenseID := uuid.New().String()
 	validUnitl := validFrom.AddDate(0, 0, validitiyPeriod)
 
-	license := &models.License{
+	license := &domain.License{
 		LicenseID:      licenseID,
 		Issuer:         issuer,
 		Verifier:       verifier,
@@ -30,7 +30,7 @@ func CreateLicense(issuer, verifier, orgUUID string, validFrom time.Time, validi
 	return license
 }
 
-func GenerateJWT(license *models.License, key []byte) (string, error) {
+func GenerateJWT(license *domain.License, key []byte) (string, error) {
 
 	// Create a new token
 	token := jwt.New(jwt.SigningMethodHS512)
