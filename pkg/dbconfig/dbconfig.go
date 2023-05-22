@@ -1,4 +1,4 @@
-package dbconndetails
+package dbconfig
 
 import (
 	"errors"
