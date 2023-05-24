@@ -6,7 +6,6 @@ import "time"
 // Users in this table will only be able to manage tenants, not licenses.
 type ManagementUser struct {
 	UserID    int       `db:"user_id"`
-	OrgUUID   string    `db:"org_uuid"`
 	Username  string    `db:"username"`
 	ApiKey    string    `db:"api_key"`
 	Email     string    `db:"email"`
