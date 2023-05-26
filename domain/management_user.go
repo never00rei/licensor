@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // This represents a user in the administration database.
 // Users in this table will only be able to manage tenants, not licenses.
@@ -15,4 +18,8 @@ type ManagementUser struct {
 	Deleted   bool      `db:"deleted"`
 	DeletedAt time.Time `db:"deleted_at"`
 	IsAdmin   bool      `db:"is_admin"`
+}
+
+type ManagementRepository interface {
+	GetAll(ctx context.Context) ([]*ManagementUser, error)
 }
