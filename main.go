@@ -37,5 +37,7 @@ func main() {
 	}
 
 	log.Println(tenants)
-
+	for _, t := range tenants {
+		log.Println(t.OrgUUID, t.OrgName)
+	}
 }
