@@ -10,7 +10,7 @@ import (
 
 // Createlicense creates a new license with the given parameters. It will calculate the valid until date based on the valid from date and the validity period which
 // should be given in days.
-func CreateLicense(issuer, verifier, orgUUID string, validFrom time.Time, validitiyPeriod int) *domain.License {
+func NewLicense(issuer, verifier, orgUUID string, validFrom time.Time, validitiyPeriod int) *domain.License {
 	licenseID := uuid.New().String()
 	validUnitl := validFrom.AddDate(0, 0, validitiyPeriod)
 

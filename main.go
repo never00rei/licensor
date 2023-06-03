@@ -1,60 +1,57 @@
 package main
 
-import (
-	"context"
-	"log"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/never00rei/licensor/pkg/dbconfig"
-	"github.com/never00rei/licensor/pkg/management"
-	managementUserRepo "github.com/never00rei/licensor/pkg/management/repository/postgresql"
-	"github.com/never00rei/licensor/pkg/tenant"
-	tenantRepo "github.com/never00rei/licensor/pkg/tenant/repository/postgresql"
-)
+import "github.com/never00rei/licensor/pkg/keygen"
 
 func main() {
 
-	config, err := dbconfig.GetDBConfigFromEnv()
+	key, err := keygen.GenerateKey("foo")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	ctx := context.Background()
+	println(key)
 
-	conn, err := pgxpool.New(ctx, config.GetConnectionURL())
-	if err != nil {
-		log.Fatal(err)
-	}
+	// config, err := dbconfig.GetDBConfigFromEnv()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	defer conn.Close()
+	// ctx := context.Background()
 
-	// Create a tenant repo
-	tenantRepo := tenantRepo.NewPostgresqlTenantRepo(conn)
+	// conn, err := pgxpool.New(ctx, config.GetConnectionURL())
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	tenantService := tenant.NewTenantService(tenantRepo)
+	// defer conn.Close()
 
-	tenants, err := tenantService.GetAll(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// // Create a tenant repo
+	// tenantRepo := tenantRepo.NewPostgresqlTenantRepo(conn)
 
-	log.Println("Tenants: ", tenants)
-	for _, t := range tenants {
-		log.Println(t.OrgID, t.OrgUUID, t.OrgName)
-	}
+	// tenantService := tenant.NewTenantService(tenantRepo)
 
-	managementUserRepo := managementUserRepo.NewPostgresqlManagementRepo(conn)
+	// tenants, err := tenantService.GetAll(ctx)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	managementService := management.NewManagementService(managementUserRepo)
+	// log.Println("Tenants: ", tenants)
+	// for _, t := range tenants {
+	// 	log.Println(t.OrgID, t.OrgUUID, t.OrgName)
+	// }
 
-	managementUsers, err := managementService.GetAll(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// managementUserRepo := managementUserRepo.NewPostgresqlManagementRepo(conn)
 
-	log.Println("Management Users: ", managementUsers)
-	for _, m := range managementUsers {
-		log.Println(m.UserID, m.Username, m.Email)
-	}
+	// managementService := management.NewManagementService(managementUserRepo)
+
+	// managementUsers, err := managementService.GetAll(ctx)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// log.Println("Management Users: ", managementUsers)
+	// for _, m := range managementUsers {
+	// 	log.Println(m.UserID, m.Username, m.Email)
+	// }
 
 }
