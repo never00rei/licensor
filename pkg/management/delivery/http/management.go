@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -49,44 +50,29 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 			// Read the API key from the "Authorization" header
 			apiKey := r.Header.Get("Authorization")
 
-			apiKeySplit := strings.Split(apiKey, " ")
-
-			if apiKeySplit[0] != "Bearer" {
-				log.Println("Invalid authorization header")
-				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
-				return
-			}
-
-			// Check if the API key is valid
-			token := strings.TrimSpace(apiKeySplit[1])
-
-			// Base64 Decode the token
-			tokenBytes, err := base64.RawURLEncoding.DecodeString(token)
+			token, err := ExtractToken(apiKey)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
 
-			// extract username from token
-			tokenSplit := strings.Split(string(tokenBytes), ":::")
-			if len(tokenSplit) != 2 {
-				log.Println("Token does not contain username")
+			username, error := ExtractUsername(*token)
+			if error != nil {
+				log.Println(error)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
-
-			username := strings.TrimSpace(tokenSplit[0])
 
 			// Get user from db
-			user, err := srv.Get(r.Context(), username)
+			user, err := srv.Get(r.Context(), *username)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
 
-			hash := sha256.Sum256([]byte(token))
+			hash := sha256.Sum256([]byte(*token))
 			apiKeyHash := hash[:]
 
 			err = bcrypt.CompareHashAndPassword([]byte(user.ApiKey), apiKeyHash)
@@ -99,4 +85,38 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func ExtractToken(bearerToken string) (*string, error) {
+	tokenSplit := strings.Split(bearerToken, " ")
+
+	if tokenSplit[0] != "Bearer" {
+		log.Println("Invalid authorization header")
+		return nil, errors.New("invalid authorization header")
+	}
+
+	// Check if the API key is valid
+	token := strings.TrimSpace(tokenSplit[1])
+
+	return &token, nil
+}
+
+func ExtractUsername(token string) (*string, error) {
+	// Base64 Decode the token
+	tokenBytes, err := base64.RawURLEncoding.DecodeString(token)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("invalid authorization header")
+	}
+
+	// extract username from token
+	tokenSplit := strings.Split(string(tokenBytes), ":::")
+	if len(tokenSplit) != 2 {
+		log.Println("Token does not contain username")
+		return nil, errors.New("invalid authorization header")
+	}
+
+	username := strings.TrimSpace(tokenSplit[0])
+
+	return &username, nil
 }
