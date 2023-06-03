@@ -57,9 +57,9 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 				return
 			}
 
-			username, error := ExtractUsername(*token)
-			if error != nil {
-				log.Println(error)
+			username, err := ExtractUsername(*token)
+			if err != nil {
+				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
@@ -95,25 +95,20 @@ func ExtractToken(bearerToken string) (*string, error) {
 		return nil, errors.New("invalid authorization header")
 	}
 
-	// Check if the API key is valid
 	token := strings.TrimSpace(tokenSplit[1])
 
 	return &token, nil
 }
 
 func ExtractUsername(token string) (*string, error) {
-	// Base64 Decode the token
 	tokenBytes, err := base64.RawURLEncoding.DecodeString(token)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("invalid authorization header")
+		return nil, err
 	}
 
-	// extract username from token
 	tokenSplit := strings.Split(string(tokenBytes), ":::")
 	if len(tokenSplit) != 2 {
-		log.Println("Token does not contain username")
-		return nil, errors.New("invalid authorization header")
+		return nil, errors.New("token does not contain username")
 	}
 
 	username := strings.TrimSpace(tokenSplit[0])
