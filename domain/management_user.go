@@ -2,8 +2,11 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"time"
 )
+
+var ErrManagementUserNotFound error = errors.New("management user not found")
 
 // This represents a user in the administration database.
 // Users in this table will only be able to manage tenants, not licenses.
@@ -21,5 +24,6 @@ type ManagementUser struct {
 }
 
 type ManagementRepository interface {
+	Get(ctx context.Context, username string) (*ManagementUser, error)
 	GetAll(ctx context.Context) ([]*ManagementUser, error)
 }

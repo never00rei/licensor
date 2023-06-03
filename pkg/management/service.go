@@ -15,6 +15,10 @@ func NewManagementService(managementRepo domain.ManagementRepository) *Managemen
 	return &ManagementService{managementRepo}
 }
 
+func (s *ManagementService) Get(ctx context.Context, username string) (*domain.ManagementUser, error) {
+	return s.managementRepo.Get(ctx, username)
+}
+
 // GetAll will return all of the management users in the management user database.
 func (s *ManagementService) GetAll(ctx context.Context) ([]*domain.ManagementUser, error) {
 	return s.managementRepo.GetAll(ctx)
