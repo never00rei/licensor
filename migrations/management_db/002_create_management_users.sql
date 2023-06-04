@@ -10,7 +10,8 @@ create table management_user(
     active boolean not null default true,
     deleted boolean not null default false,
     deleted_at timestamp,
-    is_admin boolean not null default false
+    is_admin boolean not null default false,
+    UNIQUE(EMAIL, USERNAME)
 )
 
 ---- create above / drop below ----
