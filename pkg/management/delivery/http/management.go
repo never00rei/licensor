@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/never00rei/licensor/domain"
 	"github.com/never00rei/licensor/pkg/httputils"
 	"github.com/never00rei/licensor/pkg/management"
 	"golang.org/x/crypto/bcrypt"
@@ -17,8 +18,80 @@ import (
 
 func ApplyRoutes(r chi.Router, srv *management.ManagementService) {
 	r.Use(authMiddleware(srv))
+	r.Post("/", createHandler(srv))
+	r.Delete("/{username}", deleteHandler(srv))
 	r.Get("/", getAllHandler(srv))
 	r.Get("/{username}", getHandler(srv))
+}
+
+func createHandler(srv *management.ManagementService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Decode the request
+		var user ManagementUserCreateRequest
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "failed to decode request", http.StatusBadRequest)
+			return
+		}
+
+		managementUser := domain.ManagementUser{
+			Username: user.Username,
+			Email:    user.Email,
+			IsAdmin:  user.IsAdmin,
+		}
+
+		// Call the service
+		apiKey, err := srv.Create(r.Context(), &managementUser)
+		if errors.Is(err, domain.ErrDuplicateUserExists) {
+			http.Error(w, "user already exists", http.StatusBadRequest)
+			return
+		} else if err != nil {
+			log.Println(err)
+			http.Error(w, "failed to create management user", http.StatusInternalServerError)
+			return
+		}
+
+		// Create the response
+		response := ManagementUserCreateResponse{
+			Username: user.Username,
+			ApiKey:   apiKey,
+		}
+
+		// Write the response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			return
+		}
+
+	}
+}
+
+func deleteHandler(srv *management.ManagementService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		username := chi.URLParam(r, "username")
+
+		// Call the service
+		err := srv.Delete(r.Context(), username)
+		if err != nil {
+			http.Error(w, "failed to delete management user", http.StatusInternalServerError)
+			return
+		}
+
+		// Write the response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode("success")
+		if err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			return
+		}
+
+	}
 }
 
 func getAllHandler(srv *management.ManagementService) http.HandlerFunc {

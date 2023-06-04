@@ -6,7 +6,8 @@ create table tenant(
   org_uuid uuid DEFAULT uuid_generate_v4(),
   schema_name text not null,
   created_at timestamp not null default now(),
-  updated_at timestamp not null default now()
+  updated_at timestamp not null default now(),
+  UNIQUE(org_name, schema_name)
 );
 
 ---- create above / drop below ----
