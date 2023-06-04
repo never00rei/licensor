@@ -1,57 +1,40 @@
 package main
 
-import "github.com/never00rei/licensor/pkg/keygen"
+import (
+	"crypto/sha256"
+	"log"
+
+	"github.com/never00rei/licensor/pkg/keygen"
+	"golang.org/x/crypto/bcrypt"
+)
 
 func main() {
 
-	key, err := keygen.GenerateKey("foo")
+	// key, err := keygen.GenerateApiKey("admin")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// log.Println(key)
+
+	key := "YWRtaW46Ojokxu6dGsK2kVf70VEmzGyIWGdVkCQI7YnuS6lQGHJD3Q"
+
+	dbKey, err := keygen.SaltAndHashAPIKey(key)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	println(key)
+	hash := sha256.Sum256([]byte(key))
+	apiKeyHash := hash[:]
 
-	// config, err := dbconfig.GetDBConfigFromEnv()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	// Since we'll be getting the hashed password from the DB it
+	// will be a string so we'll need to convert it to a byte slice
+	byteHash := []byte(dbKey)
+	err = bcrypt.CompareHashAndPassword(byteHash, apiKeyHash)
+	if err != nil {
+		log.Println(err)
+	}
 
-	// ctx := context.Background()
-
-	// conn, err := pgxpool.New(ctx, config.GetConnectionURL())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// defer conn.Close()
-
-	// // Create a tenant repo
-	// tenantRepo := tenantRepo.NewPostgresqlTenantRepo(conn)
-
-	// tenantService := tenant.NewTenantService(tenantRepo)
-
-	// tenants, err := tenantService.GetAll(ctx)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// log.Println("Tenants: ", tenants)
-	// for _, t := range tenants {
-	// 	log.Println(t.OrgID, t.OrgUUID, t.OrgName)
-	// }
-
-	// managementUserRepo := managementUserRepo.NewPostgresqlManagementRepo(conn)
-
-	// managementService := management.NewManagementService(managementUserRepo)
-
-	// managementUsers, err := managementService.GetAll(ctx)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// log.Println("Management Users: ", managementUsers)
-	// for _, m := range managementUsers {
-	// 	log.Println(m.UserID, m.Username, m.Email)
-	// }
+	log.Println(dbKey)
 
 }
