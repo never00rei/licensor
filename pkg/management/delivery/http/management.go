@@ -18,6 +18,7 @@ import (
 func ApplyRoutes(r chi.Router, srv *management.ManagementService) {
 	r.Use(authMiddleware(srv))
 	r.Get("/", getAllHandler(srv))
+	r.Get("/{username}", getHandler(srv))
 }
 
 func getAllHandler(srv *management.ManagementService) http.HandlerFunc {
@@ -43,6 +44,31 @@ func getAllHandler(srv *management.ManagementService) http.HandlerFunc {
 	}
 }
 
+func getHandler(srv *management.ManagementService) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		username := chi.URLParam(r, "username")
+
+		// Call the service
+		managementUser, err := srv.Get(r.Context(), username)
+		if err != nil {
+			http.Error(w, "failed to get management user", http.StatusInternalServerError)
+			return
+		}
+
+		// Write the response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(managementUser)
+		if err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			return
+		}
+
+	}
+}
+
 func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 	return func(next http.Handler) http.Handler {
 		// Get the API token from the header
@@ -50,14 +76,14 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 			// Read the API key from the "Authorization" header
 			apiKey := r.Header.Get("Authorization")
 
-			token, err := ExtractToken(apiKey)
+			token, err := extractToken(apiKey)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
 
-			username, err := ExtractUsername(*token)
+			username, err := extractUsername(token)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
@@ -65,14 +91,14 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 			}
 
 			// Get user from db
-			user, err := srv.Get(r.Context(), *username)
+			user, err := srv.Get(r.Context(), username)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
 
-			hash := sha256.Sum256([]byte(*token))
+			hash := sha256.Sum256([]byte(token))
 			apiKeyHash := hash[:]
 
 			err = bcrypt.CompareHashAndPassword([]byte(user.ApiKey), apiKeyHash)
@@ -87,31 +113,31 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 	}
 }
 
-func ExtractToken(bearerToken string) (*string, error) {
+func extractToken(bearerToken string) (string, error) {
 	tokenSplit := strings.Split(bearerToken, " ")
 
 	if tokenSplit[0] != "Bearer" {
 		log.Println("Invalid authorization header")
-		return nil, errors.New("invalid authorization header")
+		return "", errors.New("invalid authorization header")
 	}
 
 	token := strings.TrimSpace(tokenSplit[1])
 
-	return &token, nil
+	return token, nil
 }
 
-func ExtractUsername(token string) (*string, error) {
+func extractUsername(token string) (string, error) {
 	tokenBytes, err := base64.RawURLEncoding.DecodeString(token)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	tokenSplit := strings.Split(string(tokenBytes), ":::")
 	if len(tokenSplit) != 2 {
-		return nil, errors.New("token does not contain username")
+		return "", errors.New("token does not contain username")
 	}
 
 	username := strings.TrimSpace(tokenSplit[0])
 
-	return &username, nil
+	return username, nil
 }
