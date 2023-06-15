@@ -24,9 +24,15 @@ type ManagementUser struct {
 	IsAdmin   bool      `db:"is_admin" json:"is_admin"`
 }
 
+// ManagementRepository is an interface that defines the methods that must be implemented
+// in order to interact with the management user database.
 type ManagementRepository interface {
+	// Create will create a new management user in the management user database.
 	Create(ctx context.Context, user *ManagementUser) error
+	// Delete will delete a management user from the management user database.
 	Delete(ctx context.Context, username string) error
+	// Get will return a management user from the management user database.
 	Get(ctx context.Context, username string) (*ManagementUser, error)
+	// GetAll will return all of the management users in the management user database.
 	GetAll(ctx context.Context) ([]*ManagementUser, error)
 }
