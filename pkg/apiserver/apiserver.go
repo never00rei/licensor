@@ -60,5 +60,8 @@ func NewServer(pool *pgxpool.Pool) *Server {
 
 func (s *Server) Start() {
 	log.Println("Starting server on port 8080")
-	http.ListenAndServe(":8080", s.Router)
+	if err := http.ListenAndServe(":8080", s.Router); err != nil {
+		log.Fatal(err)
+	}
+
 }
