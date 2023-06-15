@@ -1,7 +1,8 @@
 -- Write your migrate up statements here
 
-create table management_user(
+CREATE TABLE application.user(
     user_id bigserial not null primary key,
+    org_uuid uuid DEFAULT uuid_generate_v4(),
     username text not null,
     api_key text not null,
     email text not null,
@@ -10,13 +11,12 @@ create table management_user(
     active boolean not null default true,
     deleted boolean not null default false,
     deleted_at timestamp,
-    is_admin boolean not null default false,
-    UNIQUE(EMAIL, USERNAME)
-)
+    UNIQUE(org_uuid, username, email)
+);
 
 ---- create above / drop below ----
 
-drop table management_user;
+DROP TABLE application.user;
 
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.

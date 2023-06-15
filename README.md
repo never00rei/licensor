@@ -20,9 +20,7 @@ To install tern:
 
 1. Run `docker-compose up -d`
 2. To login `psql -U postgres -h localhost -p 5432 postgres` use the username as the password.
-3. In the PSQL command line run `CREATE DATABASE licensor_management;`
-4. Once complete run `\c licensor_management`
-5. Then run `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";` to enable UUID v4 auto generation.
+3. In the PSQL command line run `CREATE DATABASE licensor_db;`
 
 ### Migrating the management database schema
 
@@ -32,10 +30,10 @@ export DB_HOST="localhost"
 export DB_PASSWORD="CHANGEME"
 export DB_USER="postgres"
 export DB_PORT="5432"
-export DB_DATABASE="licensor_management"
+export DB_DATABASE="licensor_db"
 
 export MIGRATOR_USER="postgres"
 export MIGRATOR_PASSWORD="CHANGEME"
 ```
 
-2. `cd migrations/management_db && tern migrate`
+2. `cd migrations/licensor_db && tern migrate`
