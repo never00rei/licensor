@@ -16,12 +16,11 @@ import (
 // but allow tenant data to be stored in seperate databases, providing data isolation.
 // However, this adds complexity as we need to change the database connection at runtime...
 type Tenant struct {
-	OrgID      int       `db:"org_id"`
-	OrgName    string    `db:"org_name"`
-	OrgUUID    string    `db:"org_uuid"`
-	SchemaName string    `db:"schema_name"`
-	CreatedAt  time.Time `db:"created_at"`
-	UpdatedAt  time.Time `db:"updated_at"`
+	OrgID     int       `db:"org_id"`
+	OrgName   string    `db:"org_name"`
+	OrgUUID   string    `db:"org_uuid"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type TenantRepository interface {

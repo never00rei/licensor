@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/never00rei/licensor/domain"
-	"github.com/never00rei/licensor/pkg/dbconfig"
+	"github.com/never00rei/licensor/pkg/config"
 	"github.com/never00rei/licensor/pkg/management"
 	managementRepo "github.com/never00rei/licensor/pkg/management/repository/postgresql"
 )
@@ -24,14 +25,17 @@ func main() {
 		return
 	}
 
-	config, err := dbconfig.GetDBConfigFromEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
+	dbconf := config.NewDefaultDBConfig().ApplyOptions(
+		config.WithDBHost(os.Getenv("DB_HOST")),
+		config.WithDBPort(os.Getenv("DB_PORT")),
+		config.WithDBUser(os.Getenv("DB_USER")),
+		config.WithDBPassword(os.Getenv("DB_PASSWORD")),
+		config.WithDBDatabase(os.Getenv("DB_DATABASE")),
+	)
 
 	ctx := context.Background()
 
-	conn, err := pgxpool.New(ctx, config.GetConnectionURL())
+	conn, err := pgxpool.New(ctx, dbconf.GetConnectionURL())
 	if err != nil {
 		log.Fatal(err)
 	}

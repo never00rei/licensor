@@ -16,6 +16,8 @@ func NewPostgresqlTenantRepo(pool *pgxpool.Pool) domain.TenantRepository {
 	return &postgresqlTenantRepo{pool}
 }
 
+// func (p *postgresqlTenantRepo) Create(ctx context.Context)
+
 // GetAll will return all of the tenants in the tenant database.
 func (p *postgresqlTenantRepo) GetAll(ctx context.Context) ([]*domain.Tenant, error) {
 	var tenants []*domain.Tenant
@@ -28,7 +30,7 @@ func (p *postgresqlTenantRepo) GetAll(ctx context.Context) ([]*domain.Tenant, er
 
 	for rows.Next() {
 		var t domain.Tenant
-		err := rows.Scan(&t.OrgID, &t.OrgName, &t.OrgUUID, &t.SchemaName, &t.CreatedAt, &t.UpdatedAt)
+		err := rows.Scan(&t.OrgID, &t.OrgName, &t.OrgUUID, &t.CreatedAt, &t.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
