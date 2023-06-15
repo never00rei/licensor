@@ -20,7 +20,17 @@ func NewPostgresqlTenantRepo(pool *pgxpool.Pool) domain.TenantRepository {
 func (p *postgresqlTenantRepo) GetAll(ctx context.Context) ([]*domain.Tenant, error) {
 	var tenants []*domain.Tenant
 
-	rows, err := p.pool.Query(ctx, "SELECT org_id, org_name, org_uuid, schema_name, created_at, updated_at FROM tenant")
+	query := `
+	SELECT 
+		org_id,
+		org_name,
+		org_uuid,
+		created_at,
+		updated_at
+	FROM management.tenant
+	`
+
+	rows, err := p.pool.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +38,7 @@ func (p *postgresqlTenantRepo) GetAll(ctx context.Context) ([]*domain.Tenant, er
 
 	for rows.Next() {
 		var t domain.Tenant
-		err := rows.Scan(&t.OrgID, &t.OrgName, &t.OrgUUID, &t.SchemaName, &t.CreatedAt, &t.UpdatedAt)
+		err := rows.Scan(&t.OrgID, &t.OrgName, &t.OrgUUID, &t.CreatedAt, &t.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
