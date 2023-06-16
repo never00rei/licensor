@@ -17,7 +17,7 @@ import (
 )
 
 func ApplyRoutes(r chi.Router, srv *management.ManagementService) {
-	r.Use(authMiddleware(srv))
+	// r.Use(authMiddleware(srv))
 	r.Post("/", createHandler(srv))
 	r.Delete("/{username}", deleteHandler(srv))
 	r.Get("/", getAllHandler(srv))
@@ -142,7 +142,7 @@ func getHandler(srv *management.ManagementService) http.HandlerFunc {
 	}
 }
 
-func authMiddleware(srv *management.ManagementService) httputils.Middleware {
+func AuthMiddleware(srv *management.ManagementService) httputils.Middleware {
 	return func(next http.Handler) http.Handler {
 		// Get the API token from the header
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -162,6 +162,8 @@ func authMiddleware(srv *management.ManagementService) httputils.Middleware {
 				http.Error(w, "invalid authorization header", http.StatusUnauthorized)
 				return
 			}
+
+			log.Println(username)
 
 			// Get user from db
 			user, err := srv.Get(r.Context(), username)

@@ -15,6 +15,11 @@ func NewTenantService(tenantRepo domain.TenantRepository) *TenantService {
 	return &TenantService{tenantRepo}
 }
 
+// Create will create a new tenant in the tenant database.
+func (s *TenantService) Create(ctx context.Context, tenant *domain.Tenant) error {
+	return s.tenantRepo.Create(ctx, tenant)
+}
+
 // GetAll will return all of the tenants in the tenant database.
 func (s *TenantService) GetAll(ctx context.Context) ([]*domain.Tenant, error) {
 	return s.tenantRepo.GetAll(ctx)

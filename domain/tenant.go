@@ -2,8 +2,11 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"time"
 )
+
+var ErrDuplicateTenantExists error = errors.New("duplicate tenant exists")
 
 // Administration Database Models.
 //
@@ -16,7 +19,6 @@ import (
 // but allow tenant data to be stored in seperate databases, providing data isolation.
 // However, this adds complexity as we need to change the database connection at runtime...
 type Tenant struct {
-	OrgID     int       `db:"org_id"`
 	OrgName   string    `db:"org_name"`
 	OrgUUID   string    `db:"org_uuid"`
 	CreatedAt time.Time `db:"created_at"`
@@ -24,5 +26,6 @@ type Tenant struct {
 }
 
 type TenantRepository interface {
+	Create(ctx context.Context, tenant *Tenant) error
 	GetAll(ctx context.Context) ([]*Tenant, error)
 }
