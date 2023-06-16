@@ -74,5 +74,8 @@ func NewServer(pool *pgxpool.Pool, config *config.AppConfig) *Server {
 
 func (s *Server) Start() {
 	log.Printf("Starting server on %s:%d", s.config.Host, s.config.Port)
-	s.server.ListenAndServe()
+	if err := s.server.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+
 }

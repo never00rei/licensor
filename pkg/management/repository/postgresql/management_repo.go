@@ -24,7 +24,7 @@ func (p *postgresqlManagementRepo) Delete(ctx context.Context, username string) 
 	}
 
 	query := `
-	UPDATE management_user 
+	UPDATE management.management_user 
 		SET deleted = true, 
 		deleted_at = CURRENT_TIMESTAMP, 
 		updated_at = CURRENT_TIMESTAMP 
@@ -44,7 +44,7 @@ func (p *postgresqlManagementRepo) Create(ctx context.Context, user *domain.Mana
 	}
 
 	query := `
-	INSERT INTO management_user(
+	INSERT INTO management.management_user(
 		username, 
 		email, 
 		api_key, 
@@ -86,7 +86,7 @@ func (p *postgresqlManagementRepo) Get(ctx context.Context, username string) (*d
 		updated_at, 
 		active,
 		is_admin 
-	FROM management_user 
+	FROM management.management_user 
 	WHERE 
 		deleted IS NOT true 
 	AND 
@@ -133,7 +133,7 @@ func (p *postgresqlManagementRepo) GetAll(ctx context.Context) ([]*domain.Manage
 		updated_at, 
 		active, 
 		is_admin 
-	FROM management_user 
+	FROM management.management_user 
 	WHERE 
 		deleted IS NOT true
 	`
