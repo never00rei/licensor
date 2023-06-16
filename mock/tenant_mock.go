@@ -7,7 +7,12 @@ import (
 )
 
 type MockTenantDatabase struct {
+	CreateFunc func(ctx context.Context, tenant *domain.Tenant) error
 	GetAllFunc func(ctx context.Context) ([]*domain.Tenant, error)
+}
+
+func (m *MockTenantDatabase) Create(ctx context.Context, tenant *domain.Tenant) error {
+	return m.CreateFunc(ctx, tenant)
 }
 
 func (m *MockTenantDatabase) GetAll(ctx context.Context) ([]*domain.Tenant, error) {

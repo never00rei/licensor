@@ -12,7 +12,6 @@ import (
 
 func exampleTenant(orgName string) *domain.Tenant {
 	return &domain.Tenant{
-		OrgID:   1,
 		OrgName: "Example Org",
 		OrgUUID: "00000000-0000-0000-0000-000000000000",
 	}

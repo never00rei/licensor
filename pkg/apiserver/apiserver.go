@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/never00rei/licensor/pkg/config"
 	"github.com/never00rei/licensor/pkg/management"
 	managementDelivery "github.com/never00rei/licensor/pkg/management/delivery/http"
 	managementRepo "github.com/never00rei/licensor/pkg/management/repository/postgresql"
@@ -18,11 +20,15 @@ import (
 )
 
 type Server struct {
+	server *http.Server
+	config *config.AppConfig
 	Router *chi.Mux
 }
 
 // NewServer will create a new Server object
-func NewServer(pool *pgxpool.Pool) *Server {
+func NewServer(pool *pgxpool.Pool, config *config.AppConfig) *Server {
+
+	s := &Server{config: config}
 
 	// Generate base router
 	baseRouter := chi.NewRouter()
@@ -40,27 +46,51 @@ func NewServer(pool *pgxpool.Pool) *Server {
 	// Generate the service
 	managementService := management.NewManagementService(managementRepo)
 
-	baseRouter.Route("/admin/user", func(r chi.Router) {
-		managementDelivery.ApplyRoutes(r, managementService)
-	})
+	// baseRouter.Route("/admin/user", func(r chi.Router) {
+	// 	managementDelivery.ApplyRoutes(r, managementService)
+	// })
 
 	tenantRepo := tenantRepo.NewPostgresqlTenantRepo(pool)
 
 	// Generate the service
 	tenantService := tenant.NewTenantService(tenantRepo)
 
-	baseRouter.Route("/admin/tenant", func(r chi.Router) {
-		tenantDelivery.ApplyRoutes(r, tenantService)
-	})
+	// A completely separate router for administrator routes
+	adminRoutes := func() http.Handler {
+		r := chi.NewRouter()
+		r.Use(managementDelivery.AuthMiddleware(managementService))
+		r.Route("/user", func(r chi.Router) {
+			managementDelivery.ApplyRoutes(r, managementService)
+		})
 
-	return &Server{
-		Router: baseRouter,
+		r.Route("/tenant", func(r chi.Router) {
+			tenantDelivery.ApplyRoutes(r, tenantService)
+		})
+		return r
 	}
+
+	baseRouter.Mount("/admin", adminRoutes())
+
+	// baseRouter.Route("/admin/tenant", func(r chi.Router) {
+	// 	tenantDelivery.ApplyRoutes(r, tenantService)
+	// })
+
+	s.Router = baseRouter
+
+	// Set the http config
+	s.server = &http.Server{
+		Addr:         fmt.Sprintf("%s:%d", config.Host, config.Port),
+		Handler:      s.Router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	return s
 }
 
 func (s *Server) Start() {
-	log.Println("Starting server on port 8080")
-	if err := http.ListenAndServe(":8080", s.Router); err != nil {
+	log.Printf("Starting server on %s:%d", s.config.Host, s.config.Port)
+	if err := s.server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 
