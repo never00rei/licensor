@@ -13,6 +13,9 @@ import (
 	"github.com/never00rei/licensor/pkg/management"
 	managementDelivery "github.com/never00rei/licensor/pkg/management/delivery/http"
 	managementRepo "github.com/never00rei/licensor/pkg/management/repository/postgresql"
+	"github.com/never00rei/licensor/pkg/user"
+	userDelivery "github.com/never00rei/licensor/pkg/user/delivery/http"
+	userRepo "github.com/never00rei/licensor/pkg/user/repository/postgresql"
 
 	"github.com/never00rei/licensor/pkg/tenant"
 	tenantDelivery "github.com/never00rei/licensor/pkg/tenant/delivery/http"
@@ -66,6 +69,20 @@ func NewServer(pool *pgxpool.Pool, config *config.AppConfig) *Server {
 	}
 
 	baseRouter.Mount("/admin", adminRoutes())
+
+	// Generate the user service
+	userRepo := userRepo.NewPostgresqlUserRepo(pool)
+	userService := user.NewUserService(userRepo)
+
+	apiRoutes := func() http.Handler {
+		r := chi.NewRouter()
+		r.Route("/user", func(r chi.Router) {
+			userDelivery.ApplyRoutes(r, userService)
+		})
+		return r
+	}
+
+	baseRouter.Mount("/api/tenant/{tenant_id}", apiRoutes())
 
 	s.Router = baseRouter
 
