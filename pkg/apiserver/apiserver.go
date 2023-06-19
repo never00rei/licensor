@@ -46,10 +46,6 @@ func NewServer(pool *pgxpool.Pool, config *config.AppConfig) *Server {
 	// Generate the service
 	managementService := management.NewManagementService(managementRepo)
 
-	// baseRouter.Route("/admin/user", func(r chi.Router) {
-	// 	managementDelivery.ApplyRoutes(r, managementService)
-	// })
-
 	tenantRepo := tenantRepo.NewPostgresqlTenantRepo(pool)
 
 	// Generate the service
@@ -70,10 +66,6 @@ func NewServer(pool *pgxpool.Pool, config *config.AppConfig) *Server {
 	}
 
 	baseRouter.Mount("/admin", adminRoutes())
-
-	// baseRouter.Route("/admin/tenant", func(r chi.Router) {
-	// 	tenantDelivery.ApplyRoutes(r, tenantService)
-	// })
 
 	s.Router = baseRouter
 
