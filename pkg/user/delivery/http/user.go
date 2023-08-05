@@ -2,55 +2,63 @@ package http
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/never00rei/licensor/domain"
 	"github.com/never00rei/licensor/pkg/user"
 )
 
 func ApplyRoutes(r chi.Router, srv *user.UserService) {
 	r.Get("/", getAllHandler(srv))
-	// r.Post("/", createHandler(srv))
+	r.Post("/", createHandler(srv))
 }
 
-// func createHandler(srv *tenant.TenantService) http.HandlerFunc {
+func createHandler(srv *user.UserService) http.HandlerFunc {
 
-// 	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-// 		var tenantRequest TenantCreateRequest
-// 		err := json.NewDecoder(r.Body).Decode(&tenantRequest)
-// 		if err != nil {
-// 			http.Error(w, "failed to decode request", http.StatusBadRequest)
-// 			return
-// 		}
+		tenantID := chi.URLParam(r, "tenant_id")
 
-// 		tenant := &domain.Tenant{
-// 			OrgName: tenantRequest.OrgName,
-// 		}
+		var userRequest UserCreateRequest
+		err := json.NewDecoder(r.Body).Decode(&userRequest)
+		if err != nil {
+			http.Error(w, "failed to decode request", http.StatusBadRequest)
+			return
+		}
 
-// 		// Call the service
-// 		err = srv.Create(r.Context(), tenant)
-// 		if err != nil {
-// 			log.Println(err)
-// 			http.Error(w, "failed to create tenant", http.StatusInternalServerError)
-// 			return
-// 		}
+		user := &domain.User{
+			OrgUUID:  tenantID,
+			Email:    userRequest.Email,
+			Username: userRequest.Username,
+		}
 
-// 		response := TenantCreateResponse{
-// 			OrgName: tenant.OrgName,
-// 		}
+		// Call the service
+		apiKey, err := srv.Create(r.Context(), user)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "failed to create user", http.StatusInternalServerError)
+			return
+		}
 
-// 		// Write the response
-// 		w.Header().Add("Content-Type", "application/json")
-// 		w.WriteHeader(http.StatusCreated)
-// 		err = json.NewEncoder(w).Encode(response)
-// 		if err != nil {
-// 			http.Error(w, "failed to encode response", http.StatusInternalServerError)
-// 			return
-// 		}
+		response := UserCreateResponse{
+			Username: user.Username,
+			Email:    user.Email,
+			ApiKey:   apiKey,
+		}
 
-// 	}
-// }
+		// Write the response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			return
+		}
+
+	}
+}
 
 func getAllHandler(srv *user.UserService) http.HandlerFunc {
 

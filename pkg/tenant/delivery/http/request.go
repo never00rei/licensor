@@ -5,6 +5,7 @@ type TenantCreateRequest struct {
 }
 
 type TenantCreateResponse struct {
-	OrgName string `json:"org_name"`
-	// OrgUUID string `json:"org_uuid"`
+	OrgName     string `json:"org_name"`
+	OrgUUID     string `json:"org_uuid"`
+	AdminApiKey string `json:"admin_api_key"`
 }

@@ -31,9 +31,19 @@ func (p *postgresqlTenantRepo) Create(ctx context.Context, tenant *domain.Tenant
 	VALUES (
 		@org_name
 	)
+	RETURNING org_uuid, org_name
 	`
 
-	_, err := p.pool.Exec(ctx, query, args)
+	rows, err := p.pool.Query(ctx, query, args)
+	for rows.Next() {
+		var t domain.Tenant
+		err := rows.Scan(&t.OrgUUID, &t.OrgName)
+		if err != nil {
+			return err
+		}
+		tenant.OrgName = t.OrgName
+		tenant.OrgUUID = t.OrgUUID
+	}
 	if pgerr, ok := err.(*pgconn.PgError); ok {
 		if pgerr.Code == "23505" {
 			return domain.ErrDuplicateTenantExists

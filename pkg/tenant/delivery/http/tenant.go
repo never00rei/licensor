@@ -31,7 +31,7 @@ func createHandler(srv *tenant.TenantService) http.HandlerFunc {
 		}
 
 		// Call the service
-		err = srv.Create(r.Context(), tenant)
+		apiKey, err := srv.Create(r.Context(), tenant)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "failed to create tenant", http.StatusInternalServerError)
@@ -39,7 +39,9 @@ func createHandler(srv *tenant.TenantService) http.HandlerFunc {
 		}
 
 		response := TenantCreateResponse{
-			OrgName: tenant.OrgName,
+			OrgUUID:     tenant.OrgUUID,
+			OrgName:     tenant.OrgName,
+			AdminApiKey: apiKey,
 		}
 
 		// Write the response
