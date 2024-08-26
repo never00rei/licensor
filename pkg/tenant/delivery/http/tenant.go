@@ -26,6 +26,12 @@ func createHandler(srv *tenant.TenantService) http.HandlerFunc {
 			return
 		}
 
+    if tenantRequest.OrgName == "" {
+      log.Print("empty field: orgname")
+      http.Error(w, "empty orgname field for tenant", http.StatusBadRequest)
+      return
+    }
+
 		tenant := &domain.Tenant{
 			OrgName: tenantRequest.OrgName,
 		}
@@ -34,7 +40,7 @@ func createHandler(srv *tenant.TenantService) http.HandlerFunc {
 		err = srv.Create(r.Context(), tenant)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, "failed to create tenant", http.StatusInternalServerError)
+			http.Error(w, "failed to create tenant", http.StatusBadRequest)
 			return
 		}
 

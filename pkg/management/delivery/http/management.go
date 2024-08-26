@@ -163,8 +163,6 @@ func AuthMiddleware(srv *management.ManagementService) httputils.Middleware {
 				return
 			}
 
-			log.Println(username)
-
 			// Get user from db
 			user, err := srv.Get(r.Context(), username)
 			if err != nil {
